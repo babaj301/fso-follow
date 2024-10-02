@@ -16,6 +16,7 @@
     "part3": "file:"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
     "nodemon": "^3.1.7"
   }
 }
