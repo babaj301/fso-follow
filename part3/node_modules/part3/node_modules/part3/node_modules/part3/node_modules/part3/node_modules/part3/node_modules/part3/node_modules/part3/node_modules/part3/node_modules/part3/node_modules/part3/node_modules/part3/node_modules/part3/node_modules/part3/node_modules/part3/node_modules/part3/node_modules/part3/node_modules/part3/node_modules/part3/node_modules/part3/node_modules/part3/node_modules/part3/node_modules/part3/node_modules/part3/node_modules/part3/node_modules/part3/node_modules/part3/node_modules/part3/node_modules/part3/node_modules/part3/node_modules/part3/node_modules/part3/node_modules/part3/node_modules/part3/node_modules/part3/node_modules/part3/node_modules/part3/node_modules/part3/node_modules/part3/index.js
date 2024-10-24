@@ -1,6 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const Note = require('./models/note');
 
 app.use(cors());
 app.use(express.static('dist'));
@@ -32,7 +34,9 @@ app.get('/', (request, response) => {
 });
 
 app.get('/api/notes', (request, response) => {
-  response.json(notes);
+  Note.find({}).then((notes) => {
+    response.json(notes);
+  });
 });
 
 app.get('/api/notes/:id', (req, res) => {
@@ -46,17 +50,17 @@ app.get('/api/notes/:id', (req, res) => {
 });
 
 app.delete('/api/notes/:id', (req, res) => {
-  const id = req.params.id;
-  notes = notes.filter((note) => note.id !== id);
-  res.status(204).end();
+  Note.findById(req.params.id).then((note) => {
+    res.json(note);
+  });
 });
 
-const generateId = () => {
-  const maxId =
-    notes.length > 1 ? Math.max(...notes.map((n) => Number(n.id))) : 0;
+// const generateId = () => {
+//   const maxId =
+//     notes.length > 1 ? Math.max(...notes.map((n) => Number(n.id))) : 0;
 
-  return String(maxId + 1);
-};
+//   return String(maxId + 1);
+// };
 
 app.post('/api/notes', (req, res) => {
   const body = req.body;
@@ -65,15 +69,14 @@ app.post('/api/notes', (req, res) => {
     return res.status(400).json({ error: 'content missing' });
   }
 
-  const note = {
+  const note = new Note({
     content: body.content,
-    important: Boolean(body.important) || false,
-    id: generateId(),
-  };
+    important: body.important || false,
+  });
 
-  notes = notes.concat(note);
-
-  res.json(note);
+  note.save().then((savedNote) => {
+    res.json(savedNote);
+  });
 });
 
 const unknownEndpoint = (request, response) => {
@@ -81,6 +84,6 @@ const unknownEndpoint = (request, response) => {
 };
 
 app.use(unknownEndpoint);
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT);
 console.log(`Server running on port ${PORT}`);
