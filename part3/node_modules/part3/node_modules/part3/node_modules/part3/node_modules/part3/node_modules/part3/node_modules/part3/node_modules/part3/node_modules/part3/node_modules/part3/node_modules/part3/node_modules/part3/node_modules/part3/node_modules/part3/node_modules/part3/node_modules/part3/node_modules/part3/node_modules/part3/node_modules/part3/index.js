@@ -40,13 +40,18 @@ app.get('/api/notes', (request, response) => {
 });
 
 app.get('/api/notes/:id', (req, res) => {
-  const id = req.params.id;
-  const note = notes.find((note) => note.id === id);
-  if (note) {
-    res.json(note);
-  } else {
-    res.status(404).end();
-  }
+  Note.findById(req.params.id)
+    .then((note) => {
+      if (note) {
+        res.json(note);
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(400).send({ error: 'malformatted id' });
+    });
 });
 
 app.delete('/api/notes/:id', (req, res) => {
