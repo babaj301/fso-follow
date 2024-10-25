@@ -39,7 +39,7 @@ app.get('/api/notes', (request, response) => {
   });
 });
 
-app.get('/api/notes/:id', (req, res) => {
+app.get('/api/notes/:id', (req, res, next) => {
   Note.findById(req.params.id)
     .then((note) => {
       if (note) {
@@ -49,8 +49,7 @@ app.get('/api/notes/:id', (req, res) => {
       }
     })
     .catch((error) => {
-      console.log(error);
-      res.status(400).send({ error: 'malformatted id' });
+      next(error);
     });
 });
 
@@ -84,11 +83,22 @@ app.post('/api/notes', (req, res) => {
   });
 });
 
+const ErrorHandler = (error, req, res, next) => {
+  console.log(error.message);
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' });
+  }
+  next(error);
+};
+
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' });
 };
 
 app.use(unknownEndpoint);
+app.use(ErrorHandler);
+
 const PORT = process.env.PORT;
 app.listen(PORT);
 console.log(`Server running on port ${PORT}`);
