@@ -52,18 +52,28 @@ app.get('/api/notes/:id', (req, res, next) => {
     });
 });
 
-app.delete('/api/notes/:id', (req, res) => {
-  Note.findById(req.params.id).then((note) => {
-    res.json(note);
-  });
+app.delete('/api/notes/:id', (req, res, next) => {
+  Note.findByIdAndDelete(req.params.id)
+    .then((result) => {
+      res.status(204).end();
+    })
+    .catch((error) => next(error));
 });
 
-// const generateId = () => {
-//   const maxId =
-//     notes.length > 1 ? Math.max(...notes.map((n) => Number(n.id))) : 0;
+app.put('/api/notes/:id', (req, res, next) => {
+  const body = request.body;
 
-//   return String(maxId + 1);
-// };
+  const note = {
+    content: body.content,
+    important: body.important,
+  };
+
+  Note.findByIdAndUpdate(req.params.id, note, { new: true })
+    .then((updatedNote) => {
+      res.json(updatedNote);
+    })
+    .catch((error) => next(error));
+});
 
 app.post('/api/notes', (req, res) => {
   const body = req.body;
