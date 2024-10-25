@@ -60,6 +60,8 @@ app.delete('/api/notes/:id', (req, res, next) => {
     .catch((error) => next(error));
 });
 
+// For editing existing notes
+
 app.put('/api/notes/:id', (req, res, next) => {
   const body = request.body;
 
@@ -91,6 +93,8 @@ app.post('/api/notes', (req, res) => {
     res.json(savedNote);
   });
 });
+
+//
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' });
