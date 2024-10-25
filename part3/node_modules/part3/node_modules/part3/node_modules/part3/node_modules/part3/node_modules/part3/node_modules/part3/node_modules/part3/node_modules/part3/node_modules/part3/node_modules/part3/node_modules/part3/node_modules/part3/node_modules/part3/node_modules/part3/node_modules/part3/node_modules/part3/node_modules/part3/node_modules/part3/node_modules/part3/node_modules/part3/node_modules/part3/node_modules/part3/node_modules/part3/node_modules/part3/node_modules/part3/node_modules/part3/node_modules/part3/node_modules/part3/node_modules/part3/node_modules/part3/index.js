@@ -6,7 +6,6 @@ const Note = require('./models/note');
 
 app.use(cors());
 app.use(express.static('dist'));
-
 app.use(express.json());
 
 let notes = [
@@ -83,7 +82,13 @@ app.post('/api/notes', (req, res) => {
   });
 });
 
-const ErrorHandler = (error, req, res, next) => {
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' });
+};
+// handler of requests with unknown endpoint
+app.use(unknownEndpoint);
+
+const errorHandler = (error, req, res, next) => {
   console.log(error.message);
 
   if (error.name === 'CastError') {
@@ -91,13 +96,8 @@ const ErrorHandler = (error, req, res, next) => {
   }
   next(error);
 };
-
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' });
-};
-
-app.use(unknownEndpoint);
-app.use(ErrorHandler);
+// handler of requests with result to errors
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT);
