@@ -1,17 +1,16 @@
-const notesRouter = require("express").Router();
-const { response } = require("express");
-const Note = require("../models/note");
+const notesRouter = require('express').Router();
+const Note = require('../models/note');
 
 // notesRouter.get('/', (request, response) => {
 //   response.send('<h1>Hello World</h1>');
 // });
 
-notesRouter.get("/", async (request, response) => {
+notesRouter.get('/', async (request, response) => {
   const notes = await Note.find({});
   response.json(notes);
 });
 
-notesRouter.get("/:id", async (req, res, next) => {
+notesRouter.get('/:id', async (req, res, next) => {
   const note = await Note.findById(req.params.id);
   if (note) {
     res.json(note);
@@ -20,32 +19,35 @@ notesRouter.get("/:id", async (req, res, next) => {
   }
 });
 
-notesRouter.delete("/:id", async (req, res, next) => {
+notesRouter.delete('/:id', async (req, res, next) => {
   await Note.findByIdAndDelete(req.params.id);
   res.status(204).end();
 });
 
 // For editing existing notes
 
-notesRouter.put("/:id", (req, res, next) => {
+notesRouter.put('/:id', async (req, res, next) => {
   const { content, important } = req.body;
 
-  Note.findByIdAndUpdate(
-    req.params.id,
-    { content, important },
-    { new: true, runValidator: true, context: "query" }
-  )
-    .then((updatedNote) => {
-      res.json(updatedNote);
-    })
-    .catch((error) => next(error));
+  try {
+    const updatedNote = await Note.findByIdAndUpdate(
+      req.params.id,
+      { content, important },
+      { new: true, runValidator: true, context: 'query' },
+    );
+
+    res.json(updatedNote);
+  } catch (error) {
+    next(error);
+  }
 });
 
-notesRouter.post("/", async (req, res, next) => {
+// Create note
+notesRouter.post('/', async (req, res, next) => {
   const body = req.body;
 
   if (body.content === undefined) {
-    return res.status(400).json({ error: "content missing" });
+    return res.status(400).json({ error: 'content missing' });
   }
 
   const note = new Note({
